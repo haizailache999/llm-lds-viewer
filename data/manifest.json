@@ -1,0 +1,982 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-06-18T19:42:52.505247+00:00",
+  "source_run_dir": "/home/yifengw3/bubble_sound/llm-lds-project/llm_lds/results/20260618_042313/pythia-14m-deduped",
+  "run_label": "pythia-14m-deduped / 20260618_042313",
+  "model": "EleutherAI/pythia-14m-deduped",
+  "config": {
+    "data": {
+      "dataset": "EleutherAI/pile_val_test",
+      "split": "test",
+      "sample_seed": 0,
+      "cache_dir": null
+    },
+    "eval": {
+      "sources": [
+        "hidden"
+      ],
+      "metric_y_types": [
+        "ln_frobenius",
+        "ln_trace"
+      ],
+      "num_prompts": 100,
+      "prompt_len": 16,
+      "num_trials": 50,
+      "eval_batch_size": 50,
+      "generate_steps": 2000,
+      "max_lag": 800,
+      "mean_calc": "per_step",
+      "include_covariance": false,
+      "temperatures": [
+        1.0
+      ],
+      "generation_seed": 3407,
+      "front_slope_k": 5,
+      "tail_slope_k": 50,
+      "lag_query": 10,
+      "plot_log_steps": true,
+      "summary_grid_steps": [
+        0,
+        128,
+        512,
+        1000,
+        2000,
+        4000,
+        8000,
+        16000,
+        32000,
+        64000,
+        100000,
+        143000
+      ],
+      "log_step_ticks": [
+        1000,
+        10000,
+        100000,
+        143000
+      ],
+      "log_step_tick_labels": [
+        "1k",
+        "10k",
+        "100k",
+        "143k"
+      ],
+      "smooth_metrics_curves": {
+        "window": 10,
+        "polyorder": 2
+      }
+    },
+    "checkpoints": {
+      "steps": [
+        0,
+        1,
+        2,
+        4,
+        8,
+        16,
+        32,
+        64,
+        128,
+        256,
+        512,
+        1000,
+        2000,
+        3000,
+        4000,
+        5000,
+        6000,
+        7000,
+        8000,
+        9000,
+        10000,
+        11000,
+        12000,
+        13000,
+        14000,
+        15000,
+        16000,
+        17000,
+        18000,
+        19000,
+        22000,
+        24000,
+        26000,
+        28000,
+        30000,
+        32000,
+        34000,
+        36000,
+        38000,
+        40000,
+        42000,
+        44000,
+        46000,
+        48000,
+        50000,
+        52000,
+        54000,
+        56000,
+        58000,
+        60000,
+        62000,
+        64000,
+        66000,
+        68000,
+        70000,
+        72000,
+        74000,
+        76000,
+        78000,
+        80000,
+        82000,
+        84000,
+        86000,
+        88000,
+        90000,
+        92000,
+        94000,
+        96000,
+        98000,
+        100000,
+        102000,
+        104000,
+        106000,
+        108000,
+        110000,
+        112000,
+        114000,
+        116000,
+        118000,
+        120000,
+        122000,
+        124000,
+        126000,
+        128000,
+        130000,
+        132000,
+        134000,
+        136000,
+        138000,
+        140000,
+        142000,
+        143000
+      ],
+      "revision_template": "step{step}"
+    }
+  },
+  "source_metadata": {
+    "checkpoint_step": 0,
+    "temperature": 1.0,
+    "num_prompts": 100,
+    "num_trials": 50,
+    "generate_steps": 2000,
+    "prompt_len": 16
+  },
+  "selection": {
+    "prompt_ids": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "trial_ids": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49
+    ],
+    "max_generated_chars": 0
+  },
+  "defaults": {
+    "prompt_id": 0,
+    "trial_id": 0
+  },
+  "summary": {
+    "checkpoint_count": 92,
+    "item_count": 46000,
+    "prompt_count": 10,
+    "trial_count": 50
+  },
+  "prompts": [
+    {
+      "id": 0,
+      "text": " which was that gardeners lacking a licence for cannabis must either destroy any plants or"
+    },
+    {
+      "id": 1,
+      "text": " social prejudice and ostracism.\n\nIt appears that thinking of ourselves"
+    },
+    {
+      "id": 2,
+      "text": "otko vs Dave Branch. All great fights, and all fun topics of discussion"
+    },
+    {
+      "id": 3,
+      "text": "library/aa451506.aspx\nalso Hans Passant has given you"
+    },
+    {
+      "id": 4,
+      "text": " tweak these people. What better way than to put up a gay pride pole right"
+    },
+    {
+      "id": 5,
+      "text": " put into a blue box with a magnet closure. Just the fact that someone cared"
+    },
+    {
+      "id": 6,
+      "text": " jointly a wealthy shop of non-public flying stories mixed with a robust base of"
+    },
+    {
+      "id": 7,
+      "text": " a short stint. It was then announced that The Phoneshow would rebrand"
+    },
+    {
+      "id": 8,
+      "text": " including HMS Volage\nFlying Squadron (1896), a British Royal"
+    },
+    {
+      "id": 9,
+      "text": "phtml\n2016-01-29T03:04:32+00"
+    }
+  ],
+  "trials": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49
+  ],
+  "chunks": [
+    {
+      "step": 0,
+      "path": "data/steps/step_0.json",
+      "item_count": 500,
+      "size_bytes": 6371978
+    },
+    {
+      "step": 1,
+      "path": "data/steps/step_1.json",
+      "item_count": 500,
+      "size_bytes": 6371978
+    },
+    {
+      "step": 2,
+      "path": "data/steps/step_2.json",
+      "item_count": 500,
+      "size_bytes": 6371924
+    },
+    {
+      "step": 4,
+      "path": "data/steps/step_4.json",
+      "item_count": 500,
+      "size_bytes": 6371411
+    },
+    {
+      "step": 8,
+      "path": "data/steps/step_8.json",
+      "item_count": 500,
+      "size_bytes": 6370546
+    },
+    {
+      "step": 16,
+      "path": "data/steps/step_16.json",
+      "item_count": 500,
+      "size_bytes": 6369083
+    },
+    {
+      "step": 32,
+      "path": "data/steps/step_32.json",
+      "item_count": 500,
+      "size_bytes": 6358500
+    },
+    {
+      "step": 64,
+      "path": "data/steps/step_64.json",
+      "item_count": 500,
+      "size_bytes": 6325602
+    },
+    {
+      "step": 128,
+      "path": "data/steps/step_128.json",
+      "item_count": 500,
+      "size_bytes": 6182197
+    },
+    {
+      "step": 256,
+      "path": "data/steps/step_256.json",
+      "item_count": 500,
+      "size_bytes": 4932954
+    },
+    {
+      "step": 512,
+      "path": "data/steps/step_512.json",
+      "item_count": 500,
+      "size_bytes": 4227078
+    },
+    {
+      "step": 1000,
+      "path": "data/steps/step_1000.json",
+      "item_count": 500,
+      "size_bytes": 4466787
+    },
+    {
+      "step": 2000,
+      "path": "data/steps/step_2000.json",
+      "item_count": 500,
+      "size_bytes": 3969081
+    },
+    {
+      "step": 3000,
+      "path": "data/steps/step_3000.json",
+      "item_count": 500,
+      "size_bytes": 4370991
+    },
+    {
+      "step": 4000,
+      "path": "data/steps/step_4000.json",
+      "item_count": 500,
+      "size_bytes": 4205305
+    },
+    {
+      "step": 5000,
+      "path": "data/steps/step_5000.json",
+      "item_count": 500,
+      "size_bytes": 4112921
+    },
+    {
+      "step": 6000,
+      "path": "data/steps/step_6000.json",
+      "item_count": 500,
+      "size_bytes": 4480082
+    },
+    {
+      "step": 7000,
+      "path": "data/steps/step_7000.json",
+      "item_count": 500,
+      "size_bytes": 4010469
+    },
+    {
+      "step": 8000,
+      "path": "data/steps/step_8000.json",
+      "item_count": 500,
+      "size_bytes": 4332895
+    },
+    {
+      "step": 9000,
+      "path": "data/steps/step_9000.json",
+      "item_count": 500,
+      "size_bytes": 4612553
+    },
+    {
+      "step": 10000,
+      "path": "data/steps/step_10000.json",
+      "item_count": 500,
+      "size_bytes": 4402268
+    },
+    {
+      "step": 11000,
+      "path": "data/steps/step_11000.json",
+      "item_count": 500,
+      "size_bytes": 4423386
+    },
+    {
+      "step": 12000,
+      "path": "data/steps/step_12000.json",
+      "item_count": 500,
+      "size_bytes": 4587587
+    },
+    {
+      "step": 13000,
+      "path": "data/steps/step_13000.json",
+      "item_count": 500,
+      "size_bytes": 4228753
+    },
+    {
+      "step": 14000,
+      "path": "data/steps/step_14000.json",
+      "item_count": 500,
+      "size_bytes": 4250011
+    },
+    {
+      "step": 15000,
+      "path": "data/steps/step_15000.json",
+      "item_count": 500,
+      "size_bytes": 4162631
+    },
+    {
+      "step": 16000,
+      "path": "data/steps/step_16000.json",
+      "item_count": 500,
+      "size_bytes": 4387362
+    },
+    {
+      "step": 17000,
+      "path": "data/steps/step_17000.json",
+      "item_count": 500,
+      "size_bytes": 4128585
+    },
+    {
+      "step": 18000,
+      "path": "data/steps/step_18000.json",
+      "item_count": 500,
+      "size_bytes": 4191675
+    },
+    {
+      "step": 19000,
+      "path": "data/steps/step_19000.json",
+      "item_count": 500,
+      "size_bytes": 4523802
+    },
+    {
+      "step": 22000,
+      "path": "data/steps/step_22000.json",
+      "item_count": 500,
+      "size_bytes": 4422963
+    },
+    {
+      "step": 24000,
+      "path": "data/steps/step_24000.json",
+      "item_count": 500,
+      "size_bytes": 4571832
+    },
+    {
+      "step": 26000,
+      "path": "data/steps/step_26000.json",
+      "item_count": 500,
+      "size_bytes": 4597721
+    },
+    {
+      "step": 28000,
+      "path": "data/steps/step_28000.json",
+      "item_count": 500,
+      "size_bytes": 4314829
+    },
+    {
+      "step": 30000,
+      "path": "data/steps/step_30000.json",
+      "item_count": 500,
+      "size_bytes": 4228366
+    },
+    {
+      "step": 32000,
+      "path": "data/steps/step_32000.json",
+      "item_count": 500,
+      "size_bytes": 4378565
+    },
+    {
+      "step": 34000,
+      "path": "data/steps/step_34000.json",
+      "item_count": 500,
+      "size_bytes": 4504047
+    },
+    {
+      "step": 36000,
+      "path": "data/steps/step_36000.json",
+      "item_count": 500,
+      "size_bytes": 4416736
+    },
+    {
+      "step": 38000,
+      "path": "data/steps/step_38000.json",
+      "item_count": 500,
+      "size_bytes": 4375687
+    },
+    {
+      "step": 40000,
+      "path": "data/steps/step_40000.json",
+      "item_count": 500,
+      "size_bytes": 4259059
+    },
+    {
+      "step": 42000,
+      "path": "data/steps/step_42000.json",
+      "item_count": 500,
+      "size_bytes": 4181798
+    },
+    {
+      "step": 44000,
+      "path": "data/steps/step_44000.json",
+      "item_count": 500,
+      "size_bytes": 4442865
+    },
+    {
+      "step": 46000,
+      "path": "data/steps/step_46000.json",
+      "item_count": 500,
+      "size_bytes": 4280108
+    },
+    {
+      "step": 48000,
+      "path": "data/steps/step_48000.json",
+      "item_count": 500,
+      "size_bytes": 4093464
+    },
+    {
+      "step": 50000,
+      "path": "data/steps/step_50000.json",
+      "item_count": 500,
+      "size_bytes": 4252266
+    },
+    {
+      "step": 52000,
+      "path": "data/steps/step_52000.json",
+      "item_count": 500,
+      "size_bytes": 3851673
+    },
+    {
+      "step": 54000,
+      "path": "data/steps/step_54000.json",
+      "item_count": 500,
+      "size_bytes": 4354480
+    },
+    {
+      "step": 56000,
+      "path": "data/steps/step_56000.json",
+      "item_count": 500,
+      "size_bytes": 3899499
+    },
+    {
+      "step": 58000,
+      "path": "data/steps/step_58000.json",
+      "item_count": 500,
+      "size_bytes": 3969026
+    },
+    {
+      "step": 60000,
+      "path": "data/steps/step_60000.json",
+      "item_count": 500,
+      "size_bytes": 4207120
+    },
+    {
+      "step": 62000,
+      "path": "data/steps/step_62000.json",
+      "item_count": 500,
+      "size_bytes": 4532609
+    },
+    {
+      "step": 64000,
+      "path": "data/steps/step_64000.json",
+      "item_count": 500,
+      "size_bytes": 4143332
+    },
+    {
+      "step": 66000,
+      "path": "data/steps/step_66000.json",
+      "item_count": 500,
+      "size_bytes": 4185961
+    },
+    {
+      "step": 68000,
+      "path": "data/steps/step_68000.json",
+      "item_count": 500,
+      "size_bytes": 4419596
+    },
+    {
+      "step": 70000,
+      "path": "data/steps/step_70000.json",
+      "item_count": 500,
+      "size_bytes": 4365868
+    },
+    {
+      "step": 72000,
+      "path": "data/steps/step_72000.json",
+      "item_count": 500,
+      "size_bytes": 4099949
+    },
+    {
+      "step": 74000,
+      "path": "data/steps/step_74000.json",
+      "item_count": 500,
+      "size_bytes": 4565188
+    },
+    {
+      "step": 76000,
+      "path": "data/steps/step_76000.json",
+      "item_count": 500,
+      "size_bytes": 3958465
+    },
+    {
+      "step": 78000,
+      "path": "data/steps/step_78000.json",
+      "item_count": 500,
+      "size_bytes": 4509113
+    },
+    {
+      "step": 80000,
+      "path": "data/steps/step_80000.json",
+      "item_count": 500,
+      "size_bytes": 4110061
+    },
+    {
+      "step": 82000,
+      "path": "data/steps/step_82000.json",
+      "item_count": 500,
+      "size_bytes": 4434832
+    },
+    {
+      "step": 84000,
+      "path": "data/steps/step_84000.json",
+      "item_count": 500,
+      "size_bytes": 4483971
+    },
+    {
+      "step": 86000,
+      "path": "data/steps/step_86000.json",
+      "item_count": 500,
+      "size_bytes": 3862812
+    },
+    {
+      "step": 88000,
+      "path": "data/steps/step_88000.json",
+      "item_count": 500,
+      "size_bytes": 4491037
+    },
+    {
+      "step": 90000,
+      "path": "data/steps/step_90000.json",
+      "item_count": 500,
+      "size_bytes": 4184174
+    },
+    {
+      "step": 92000,
+      "path": "data/steps/step_92000.json",
+      "item_count": 500,
+      "size_bytes": 4310981
+    },
+    {
+      "step": 94000,
+      "path": "data/steps/step_94000.json",
+      "item_count": 500,
+      "size_bytes": 4435030
+    },
+    {
+      "step": 96000,
+      "path": "data/steps/step_96000.json",
+      "item_count": 500,
+      "size_bytes": 4422123
+    },
+    {
+      "step": 98000,
+      "path": "data/steps/step_98000.json",
+      "item_count": 500,
+      "size_bytes": 4544686
+    },
+    {
+      "step": 100000,
+      "path": "data/steps/step_100000.json",
+      "item_count": 500,
+      "size_bytes": 4541214
+    },
+    {
+      "step": 102000,
+      "path": "data/steps/step_102000.json",
+      "item_count": 500,
+      "size_bytes": 4542497
+    },
+    {
+      "step": 104000,
+      "path": "data/steps/step_104000.json",
+      "item_count": 500,
+      "size_bytes": 4156300
+    },
+    {
+      "step": 106000,
+      "path": "data/steps/step_106000.json",
+      "item_count": 500,
+      "size_bytes": 4379068
+    },
+    {
+      "step": 108000,
+      "path": "data/steps/step_108000.json",
+      "item_count": 500,
+      "size_bytes": 4359540
+    },
+    {
+      "step": 110000,
+      "path": "data/steps/step_110000.json",
+      "item_count": 500,
+      "size_bytes": 4133367
+    },
+    {
+      "step": 112000,
+      "path": "data/steps/step_112000.json",
+      "item_count": 500,
+      "size_bytes": 4303101
+    },
+    {
+      "step": 114000,
+      "path": "data/steps/step_114000.json",
+      "item_count": 500,
+      "size_bytes": 4418622
+    },
+    {
+      "step": 116000,
+      "path": "data/steps/step_116000.json",
+      "item_count": 500,
+      "size_bytes": 4473479
+    },
+    {
+      "step": 118000,
+      "path": "data/steps/step_118000.json",
+      "item_count": 500,
+      "size_bytes": 4265936
+    },
+    {
+      "step": 120000,
+      "path": "data/steps/step_120000.json",
+      "item_count": 500,
+      "size_bytes": 4354575
+    },
+    {
+      "step": 122000,
+      "path": "data/steps/step_122000.json",
+      "item_count": 500,
+      "size_bytes": 4387352
+    },
+    {
+      "step": 124000,
+      "path": "data/steps/step_124000.json",
+      "item_count": 500,
+      "size_bytes": 4333017
+    },
+    {
+      "step": 126000,
+      "path": "data/steps/step_126000.json",
+      "item_count": 500,
+      "size_bytes": 4309603
+    },
+    {
+      "step": 128000,
+      "path": "data/steps/step_128000.json",
+      "item_count": 500,
+      "size_bytes": 4221959
+    },
+    {
+      "step": 130000,
+      "path": "data/steps/step_130000.json",
+      "item_count": 500,
+      "size_bytes": 4341567
+    },
+    {
+      "step": 132000,
+      "path": "data/steps/step_132000.json",
+      "item_count": 500,
+      "size_bytes": 4302711
+    },
+    {
+      "step": 134000,
+      "path": "data/steps/step_134000.json",
+      "item_count": 500,
+      "size_bytes": 4323089
+    },
+    {
+      "step": 136000,
+      "path": "data/steps/step_136000.json",
+      "item_count": 500,
+      "size_bytes": 4343363
+    },
+    {
+      "step": 138000,
+      "path": "data/steps/step_138000.json",
+      "item_count": 500,
+      "size_bytes": 4314289
+    },
+    {
+      "step": 140000,
+      "path": "data/steps/step_140000.json",
+      "item_count": 500,
+      "size_bytes": 4317013
+    },
+    {
+      "step": 142000,
+      "path": "data/steps/step_142000.json",
+      "item_count": 500,
+      "size_bytes": 4312647
+    },
+    {
+      "step": 143000,
+      "path": "data/steps/step_143000.json",
+      "item_count": 500,
+      "size_bytes": 4328074
+    }
+  ],
+  "figures": [
+    {
+      "label": "Validation loss",
+      "path": "assets/val_loss_vs_step.png"
+    },
+    {
+      "label": "Validation perplexity",
+      "path": "assets/val_ppl_vs_step.png"
+    }
+  ],
+  "prompt_figures": {
+    "0": {
+      "metric": "ln_trace",
+      "temperature": "1.0",
+      "source": "hidden",
+      "path": "assets/prompt_figures/ln_trace/prompt_0_step_grid_summary_free_y.png",
+      "label": "ln_trace summary for prompt 0"
+    },
+    "1": {
+      "metric": "ln_trace",
+      "temperature": "1.0",
+      "source": "hidden",
+      "path": "assets/prompt_figures/ln_trace/prompt_1_step_grid_summary_free_y.png",
+      "label": "ln_trace summary for prompt 1"
+    },
+    "2": {
+      "metric": "ln_trace",
+      "temperature": "1.0",
+      "source": "hidden",
+      "path": "assets/prompt_figures/ln_trace/prompt_2_step_grid_summary_free_y.png",
+      "label": "ln_trace summary for prompt 2"
+    },
+    "3": {
+      "metric": "ln_trace",
+      "temperature": "1.0",
+      "source": "hidden",
+      "path": "assets/prompt_figures/ln_trace/prompt_3_step_grid_summary_free_y.png",
+      "label": "ln_trace summary for prompt 3"
+    },
+    "4": {
+      "metric": "ln_trace",
+      "temperature": "1.0",
+      "source": "hidden",
+      "path": "assets/prompt_figures/ln_trace/prompt_4_step_grid_summary_free_y.png",
+      "label": "ln_trace summary for prompt 4"
+    },
+    "5": {
+      "metric": "ln_trace",
+      "temperature": "1.0",
+      "source": "hidden",
+      "path": "assets/prompt_figures/ln_trace/prompt_5_step_grid_summary_free_y.png",
+      "label": "ln_trace summary for prompt 5"
+    },
+    "6": {
+      "metric": "ln_trace",
+      "temperature": "1.0",
+      "source": "hidden",
+      "path": "assets/prompt_figures/ln_trace/prompt_6_step_grid_summary_free_y.png",
+      "label": "ln_trace summary for prompt 6"
+    },
+    "7": {
+      "metric": "ln_trace",
+      "temperature": "1.0",
+      "source": "hidden",
+      "path": "assets/prompt_figures/ln_trace/prompt_7_step_grid_summary_free_y.png",
+      "label": "ln_trace summary for prompt 7"
+    },
+    "8": {
+      "metric": "ln_trace",
+      "temperature": "1.0",
+      "source": "hidden",
+      "path": "assets/prompt_figures/ln_trace/prompt_8_step_grid_summary_free_y.png",
+      "label": "ln_trace summary for prompt 8"
+    },
+    "9": {
+      "metric": "ln_trace",
+      "temperature": "1.0",
+      "source": "hidden",
+      "path": "assets/prompt_figures/ln_trace/prompt_9_step_grid_summary_free_y.png",
+      "label": "ln_trace summary for prompt 9"
+    }
+  }
+}

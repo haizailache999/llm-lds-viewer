@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>LLM-LDS Generation Viewer</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <p class="eyebrow">LLM-LDS generation review</p>
+        <h1 id="runTitle">Generation checkpoints</h1>
+      </div>
+      <div class="progress-control">
+        <div class="progress-row">
+          <span id="currentStepLabel">Step --</span>
+          <span id="checkpointCounter">0 / 0</span>
+        </div>
+        <input id="stepRange" type="range" min="0" max="0" value="0" aria-label="Checkpoint progress">
+      </div>
+    </header>
+
+    <div id="loadError" class="load-error" hidden></div>
+
+    <div class="app-shell">
+      <aside class="sidebar">
+        <section class="panel">
+          <h2>Run</h2>
+          <dl class="meta-list">
+            <div>
+              <dt>Model</dt>
+              <dd id="modelName">--</dd>
+            </div>
+            <div>
+              <dt>Checkpoints</dt>
+              <dd id="checkpointCount">--</dd>
+            </div>
+            <div>
+              <dt>Items</dt>
+              <dd id="itemCount">--</dd>
+            </div>
+            <div>
+              <dt>Selection</dt>
+              <dd id="selectionSummary">--</dd>
+            </div>
+          </dl>
+        </section>
+
+        <section class="panel">
+          <h2>Filters</h2>
+          <label class="field">
+            <span>Prompt</span>
+            <select id="promptSelect"></select>
+          </label>
+          <label class="field">
+            <span>Trial</span>
+            <select id="trialSelect"></select>
+          </label>
+          <label class="field">
+            <span>Step</span>
+            <select id="stepSelect"></select>
+          </label>
+        </section>
+
+        <section class="panel">
+          <h2>Prompt Figure</h2>
+          <div id="promptFigureMount" class="figure-mount prompt-figure-mount"></div>
+        </section>
+
+        <section class="panel">
+          <h2>Metrics</h2>
+          <div id="figureMount" class="figure-mount"></div>
+        </section>
+      </aside>
+
+      <main id="stepMount" class="step-mount" aria-live="polite"></main>
+    </div>
+
+    <script src="app.js" defer></script>
+  </body>
+</html>
