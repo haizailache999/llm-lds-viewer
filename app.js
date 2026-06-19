@@ -1,18 +1,27 @@
+const ALL_VALUE = "all";
+const PAGE_SIZE = 80;
+const STEP_CHUNKS_PER_BATCH = 12;
+
 const state = {
   manifest: null,
   loadedSteps: new Map(),
-  currentIndex: 0,
-  promptFilter: "all",
-  trialFilter: "all",
-  stepFilter: "all",
-  loading: new Map()
+  loading: new Map(),
+  promptValue: ALL_VALUE,
+  trialValue: ALL_VALUE,
+  stepValue: ALL_VALUE,
+  resultSession: 0,
+  resultStepIndexes: [],
+  resultChunkCursor: 0,
+  pendingItems: [],
+  renderedCount: 0,
+  scannedChunkCount: 0,
+  isLoadingBatch: false
 };
 
 const els = {
   runTitle: document.getElementById("runTitle"),
   currentStepLabel: document.getElementById("currentStepLabel"),
   checkpointCounter: document.getElementById("checkpointCounter"),
-  stepRange: document.getElementById("stepRange"),
   loadError: document.getElementById("loadError"),
   modelName: document.getElementById("modelName"),
   checkpointCount: document.getElementById("checkpointCount"),
@@ -21,9 +30,21 @@ const els = {
   promptSelect: document.getElementById("promptSelect"),
   trialSelect: document.getElementById("trialSelect"),
   stepSelect: document.getElementById("stepSelect"),
+  promptRange: document.getElementById("promptRange"),
+  trialRange: document.getElementById("trialRange"),
+  stepRange: document.getElementById("stepRange"),
+  promptValueLabel: document.getElementById("promptValueLabel"),
+  trialValueLabel: document.getElementById("trialValueLabel"),
+  stepValueLabel: document.getElementById("stepValueLabel"),
+  promptMinLabel: document.getElementById("promptMinLabel"),
+  trialMinLabel: document.getElementById("trialMinLabel"),
+  stepMinLabel: document.getElementById("stepMinLabel"),
   promptFigureMount: document.getElementById("promptFigureMount"),
   figureMount: document.getElementById("figureMount"),
-  stepMount: document.getElementById("stepMount")
+  resultTitle: document.getElementById("resultTitle"),
+  resultSummary: document.getElementById("resultSummary"),
+  resultList: document.getElementById("resultList"),
+  loadMoreButton: document.getElementById("loadMoreButton")
 };
 
 function compactNumber(value) {
@@ -62,31 +83,128 @@ async function fetchJson(path) {
   return response.json();
 }
 
-function currentChunk() {
-  return state.manifest.chunks[state.currentIndex];
+function promptValues() {
+  return state.manifest.prompts.map((prompt) => String(prompt.id)).concat(ALL_VALUE);
 }
 
-function updateProgress(index) {
-  const chunk = state.manifest.chunks[index];
-  if (!chunk) {
-    return;
+function trialValues() {
+  return state.manifest.trials.map((trial) => String(trial)).concat(ALL_VALUE);
+}
+
+function stepValues() {
+  return state.manifest.chunks.map((chunk) => String(chunk.step)).concat(ALL_VALUE);
+}
+
+function controlValues(kind) {
+  if (kind === "prompt") {
+    return promptValues();
+  }
+  if (kind === "trial") {
+    return trialValues();
+  }
+  return stepValues();
+}
+
+function controlElements(kind) {
+  if (kind === "prompt") {
+    return {
+      select: els.promptSelect,
+      range: els.promptRange,
+      label: els.promptValueLabel
+    };
+  }
+  if (kind === "trial") {
+    return {
+      select: els.trialSelect,
+      range: els.trialRange,
+      label: els.trialValueLabel
+    };
+  }
+  return {
+    select: els.stepSelect,
+    range: els.stepRange,
+    label: els.stepValueLabel
+  };
+}
+
+function controlStateKey(kind) {
+  return `${kind}Value`;
+}
+
+function labelForValue(kind, value) {
+  if (value === ALL_VALUE) {
+    if (kind === "prompt") {
+      return "All prompts";
+    }
+    if (kind === "trial") {
+      return "All trials";
+    }
+    return "All steps";
   }
 
-  state.currentIndex = index;
-  els.stepRange.value = String(index);
-  els.currentStepLabel.textContent = `Step ${compactNumber(chunk.step)}`;
-  els.checkpointCounter.textContent = `${index + 1} / ${state.manifest.chunks.length}`;
+  if (kind === "prompt") {
+    return `Prompt ${value}`;
+  }
+  if (kind === "trial") {
+    return `Trial ${value}`;
+  }
+  return `Step ${compactNumber(Number(value))}`;
+}
 
-  const max = Math.max(1, state.manifest.chunks.length - 1);
-  const pct = Math.round((index / max) * 100);
-  els.stepRange.style.background = `linear-gradient(90deg, var(--accent) ${pct}%, #d6ddd8 ${pct}%)`;
+function optionLabelForValue(kind, value) {
+  if (value === ALL_VALUE) {
+    return labelForValue(kind, value);
+  }
 
-  document.querySelectorAll(".step-section.is-current").forEach((node) => {
-    node.classList.remove("is-current");
-  });
-  const section = document.querySelector(`[data-step-index="${index}"]`);
-  if (section) {
-    section.classList.add("is-current");
+  if (kind === "prompt") {
+    const prompt = state.manifest.prompts.find((entry) => String(entry.id) === String(value));
+    return `Prompt ${value}: ${shortText(prompt ? prompt.text : "", 70)}`;
+  }
+
+  return labelForValue(kind, value);
+}
+
+function setRangeFill(range) {
+  const max = Math.max(1, Number(range.max));
+  const pct = Math.round((Number(range.value) / max) * 100);
+  range.style.background = `linear-gradient(90deg, var(--accent) ${pct}%, #d6ddd8 ${pct}%)`;
+}
+
+function sliderIndexToValue(kind, index) {
+  const values = controlValues(kind);
+  const safeIndex = Math.max(0, Math.min(Number(index), values.length - 1));
+  return values[safeIndex];
+}
+
+function valueToSliderIndex(kind, value) {
+  const values = controlValues(kind);
+  const index = values.indexOf(String(value));
+  return index >= 0 ? index : 0;
+}
+
+function syncControl(kind) {
+  const value = state[controlStateKey(kind)];
+  const { select, range, label } = controlElements(kind);
+  const sliderIndex = valueToSliderIndex(kind, value);
+
+  select.value = value;
+  range.value = String(sliderIndex);
+  label.textContent = labelForValue(kind, value);
+  setRangeFill(range);
+}
+
+function setControl(kind, value, options = {}) {
+  state[controlStateKey(kind)] = String(value);
+  syncControl(kind);
+
+  if (kind === "prompt") {
+    renderPromptFigure();
+  }
+
+  updateSelectionStatus();
+
+  if (options.render !== false) {
+    startResultRender();
   }
 }
 
@@ -95,6 +213,22 @@ function populateOption(select, value, label) {
   option.value = value;
   option.textContent = label;
   select.appendChild(option);
+}
+
+function populateControl(kind) {
+  const { select, range } = controlElements(kind);
+  const values = controlValues(kind);
+  select.innerHTML = "";
+  values.forEach((value) => {
+    populateOption(select, value, optionLabelForValue(kind, value));
+  });
+  range.max = String(values.length - 1);
+  range.value = "0";
+}
+
+function defaultStepValue() {
+  const firstChunk = state.manifest.chunks[0];
+  return firstChunk ? String(firstChunk.step) : ALL_VALUE;
 }
 
 function renderMeta() {
@@ -108,44 +242,52 @@ function renderMeta() {
 
   document.title = `${manifest.run_label || "LLM-LDS"} | Generation Viewer`;
 
-  els.promptSelect.innerHTML = "";
-  populateOption(els.promptSelect, "all", "All included prompts");
-  manifest.prompts.forEach((prompt) => {
-    populateOption(
-      els.promptSelect,
-      String(prompt.id),
-      `Prompt ${prompt.id}: ${shortText(prompt.text, 70)}`
-    );
-  });
+  populateControl("prompt");
+  populateControl("trial");
+  populateControl("step");
 
-  const defaultPrompt = manifest.defaults.prompt_id;
-  if (defaultPrompt !== null && defaultPrompt !== undefined) {
-    els.promptSelect.value = String(defaultPrompt);
-    state.promptFilter = String(defaultPrompt);
-  }
+  els.promptMinLabel.textContent = labelForValue("prompt", promptValues()[0] || "0");
+  els.trialMinLabel.textContent = labelForValue("trial", trialValues()[0] || "0");
+  els.stepMinLabel.textContent = labelForValue("step", stepValues()[0] || "0");
 
-  els.trialSelect.innerHTML = "";
-  populateOption(els.trialSelect, "all", "All included trials");
-  manifest.trials.forEach((trial) => {
-    populateOption(els.trialSelect, String(trial), `Trial ${trial}`);
-  });
+  state.promptValue = manifest.defaults.prompt_id !== null && manifest.defaults.prompt_id !== undefined
+    ? String(manifest.defaults.prompt_id)
+    : ALL_VALUE;
+  state.trialValue = manifest.defaults.trial_id !== null && manifest.defaults.trial_id !== undefined
+    ? String(manifest.defaults.trial_id)
+    : ALL_VALUE;
+  state.stepValue = defaultStepValue();
 
-  const defaultTrial = manifest.defaults.trial_id;
-  if (defaultTrial !== null && defaultTrial !== undefined) {
-    els.trialSelect.value = String(defaultTrial);
-    state.trialFilter = String(defaultTrial);
-  }
+  syncControl("prompt");
+  syncControl("trial");
+  syncControl("step");
+  updateSelectionStatus();
+}
 
-  els.stepSelect.innerHTML = "";
-  populateOption(els.stepSelect, "all", "All steps");
-  manifest.chunks.forEach((chunk) => {
-    populateOption(els.stepSelect, String(chunk.step), `Step ${compactNumber(chunk.step)}`);
-  });
-  els.stepSelect.value = "all";
-  state.stepFilter = "all";
+function selectedLabels() {
+  return [
+    labelForValue("prompt", state.promptValue),
+    labelForValue("trial", state.trialValue),
+    labelForValue("step", state.stepValue)
+  ];
+}
 
-  els.stepRange.max = String(Math.max(0, manifest.chunks.length - 1));
-  els.stepRange.value = "0";
+function selectedMatchEstimate() {
+  const promptCount = state.promptValue === ALL_VALUE ? state.manifest.prompts.length : 1;
+  const trialCount = state.trialValue === ALL_VALUE ? state.manifest.trials.length : 1;
+  const stepCount = state.stepValue === ALL_VALUE ? state.manifest.chunks.length : 1;
+  return promptCount * trialCount * stepCount;
+}
+
+function updateSelectionStatus() {
+  const labels = selectedLabels();
+  const estimate = selectedMatchEstimate();
+  const allCount = [state.promptValue, state.trialValue, state.stepValue]
+    .filter((value) => value === ALL_VALUE).length;
+
+  els.currentStepLabel.textContent = labels.join(" · ");
+  els.checkpointCounter.textContent = `${compactNumber(estimate)} matching responses`;
+  els.resultTitle.textContent = allCount === 0 ? "Selected Response" : "Selected Responses";
 }
 
 function renderFigures() {
@@ -179,13 +321,13 @@ function renderFigures() {
 function renderPromptFigure() {
   els.promptFigureMount.innerHTML = "";
 
-  if (state.promptFilter === "all") {
-    els.promptFigureMount.appendChild(makeEl("div", "empty-state", "Choose one prompt to view its ln_trace summary."));
+  if (state.promptValue === ALL_VALUE) {
+    els.promptFigureMount.appendChild(makeEl("div", "empty-state", "All prompts selected."));
     return;
   }
 
   const promptFigures = state.manifest.prompt_figures || {};
-  const figure = promptFigures[state.promptFilter];
+  const figure = promptFigures[state.promptValue];
   if (!figure) {
     els.promptFigureMount.appendChild(makeEl("div", "empty-state", "No ln_trace summary figure found for this prompt."));
     return;
@@ -200,51 +342,61 @@ function renderPromptFigure() {
 
   const image = document.createElement("img");
   image.src = figure.path;
-  image.alt = figure.label || `ln_trace summary for prompt ${state.promptFilter}`;
+  image.alt = figure.label || `ln_trace summary for prompt ${state.promptValue}`;
   image.loading = "lazy";
 
   const caption = makeEl(
     "figcaption",
     "",
-    figure.label || `ln_trace summary for prompt ${state.promptFilter}`
+    figure.label || `ln_trace summary for prompt ${state.promptValue}`
   );
   link.appendChild(image);
   wrapper.append(link, caption);
   els.promptFigureMount.appendChild(wrapper);
 }
 
-function createStepSections() {
-  els.stepMount.innerHTML = "";
-  state.manifest.chunks.forEach((chunk, index) => {
-    const section = makeEl("section", "step-section is-pending");
-    section.id = `step-${chunk.step}`;
-    section.dataset.stepIndex = String(index);
+function selectedStepIndexes() {
+  if (state.stepValue === ALL_VALUE) {
+    return state.manifest.chunks.map((_, index) => index);
+  }
 
-    const heading = makeEl("div", "step-heading");
-    const title = makeEl("h2", "", `Step ${compactNumber(chunk.step)}`);
-    const meta = makeEl(
-      "div",
-      "step-meta",
-      `${compactNumber(chunk.item_count)} exported items`
-    );
-    heading.append(title, meta);
-
-    const content = makeEl("div", "step-content");
-    content.appendChild(makeEl("div", "status-line", "Waiting"));
-
-    section.append(heading, content);
-    els.stepMount.appendChild(section);
-  });
+  const index = state.manifest.chunks.findIndex((chunk) => String(chunk.step) === state.stepValue);
+  return index >= 0 ? [index] : [];
 }
 
-function itemMatchesFilters(item) {
-  if (state.promptFilter !== "all" && String(item.prompt_id) !== state.promptFilter) {
+function itemMatchesControls(item) {
+  if (state.promptValue !== ALL_VALUE && String(item.prompt_id) !== state.promptValue) {
     return false;
   }
-  if (state.trialFilter !== "all" && String(item.trial_id) !== state.trialFilter) {
+  if (state.trialValue !== ALL_VALUE && String(item.trial_id) !== state.trialValue) {
     return false;
   }
   return true;
+}
+
+function loadStepData(index) {
+  const chunk = state.manifest.chunks[index];
+  if (!chunk) {
+    return Promise.resolve(null);
+  }
+  if (state.loadedSteps.has(chunk.step)) {
+    return Promise.resolve(state.loadedSteps.get(chunk.step));
+  }
+  if (state.loading.has(chunk.step)) {
+    return state.loading.get(chunk.step);
+  }
+
+  const promise = fetchJson(chunk.path)
+    .then((data) => {
+      state.loadedSteps.set(chunk.step, data);
+      return data;
+    })
+    .finally(() => {
+      state.loading.delete(chunk.step);
+    });
+
+  state.loading.set(chunk.step, promise);
+  return promise;
 }
 
 function renderTextBlock(className, title, text) {
@@ -261,7 +413,8 @@ function renderItem(item) {
 
   const head = makeEl("div", "generation-head");
   const tags = makeEl("div", "tag-row");
-  tags.appendChild(makeEl("span", "tag accent", `Prompt ${item.prompt_id}`));
+  tags.appendChild(makeEl("span", "tag accent", `Step ${compactNumber(item.step)}`));
+  tags.appendChild(makeEl("span", "tag", `Prompt ${item.prompt_id}`));
   tags.appendChild(makeEl("span", "tag warm", `Trial ${item.trial_id}`));
   if (item.truncated) {
     tags.appendChild(makeEl("span", "tag", "Truncated"));
@@ -280,166 +433,137 @@ function renderItem(item) {
   return article;
 }
 
-function renderStep(section, data) {
-  section.classList.remove("is-pending");
-  const content = section.querySelector(".step-content");
-  content.innerHTML = "";
+function appendResultItems(items) {
+  const fragment = document.createDocumentFragment();
+  items.forEach((item) => {
+    fragment.appendChild(renderItem(item));
+  });
+  els.resultList.appendChild(fragment);
+}
 
-  const filtered = data.items.filter(itemMatchesFilters);
-  const headingMeta = section.querySelector(".step-meta");
-  headingMeta.textContent = `${compactNumber(filtered.length)} visible of ${compactNumber(data.items.length)} exported`;
+function updateResultSummary() {
+  const estimate = selectedMatchEstimate();
+  const totalSteps = state.resultStepIndexes.length;
+  const scannedSteps = state.scannedChunkCount;
+  const stepPart = state.stepValue === ALL_VALUE
+    ? `${compactNumber(scannedSteps)} of ${compactNumber(totalSteps)} step chunks scanned`
+    : `${compactNumber(totalSteps)} step chunk scanned`;
 
-  if (!filtered.length) {
-    content.appendChild(makeEl("div", "empty-state", "No exported items match the current filters."));
+  els.resultSummary.textContent =
+    `${compactNumber(state.renderedCount)} of ${compactNumber(estimate)} shown · ${stepPart}`;
+}
+
+function setLoadMoreState(hasMore) {
+  els.loadMoreButton.hidden = !hasMore;
+  els.loadMoreButton.disabled = state.isLoadingBatch;
+  els.loadMoreButton.textContent = state.isLoadingBatch ? "Loading..." : "Load more";
+}
+
+function resetResultState() {
+  state.resultStepIndexes = selectedStepIndexes();
+  state.resultChunkCursor = 0;
+  state.pendingItems = [];
+  state.renderedCount = 0;
+  state.scannedChunkCount = 0;
+  state.isLoadingBatch = false;
+  els.resultList.innerHTML = "";
+  setLoadMoreState(false);
+  updateResultSummary();
+}
+
+async function loadMoreResults(session = state.resultSession) {
+  if (state.isLoadingBatch) {
     return;
   }
 
-  const list = makeEl("div", "generation-list");
-  filtered.forEach((item) => {
-    list.appendChild(renderItem(item));
-  });
-  content.appendChild(list);
-}
+  state.isLoadingBatch = true;
+  setLoadMoreState(true);
 
-function loadStep(index) {
-  const chunk = state.manifest.chunks[index];
-  if (!chunk || state.loadedSteps.has(chunk.step)) {
-    return Promise.resolve();
-  }
-  if (state.loading.has(chunk.step)) {
-    return state.loading.get(chunk.step);
-  }
+  try {
+    let chunksLoaded = 0;
+    while (
+      state.pendingItems.length < PAGE_SIZE &&
+      state.resultChunkCursor < state.resultStepIndexes.length &&
+      chunksLoaded < STEP_CHUNKS_PER_BATCH
+    ) {
+      const stepIndex = state.resultStepIndexes[state.resultChunkCursor];
+      state.resultChunkCursor += 1;
+      chunksLoaded += 1;
 
-  const section = document.querySelector(`[data-step-index="${index}"]`);
-  const content = section.querySelector(".step-content");
-  content.innerHTML = "";
-  content.appendChild(makeEl("div", "status-line", "Loading"));
-
-  const promise = (async () => {
-    try {
-      const data = await fetchJson(chunk.path);
-      state.loadedSteps.set(chunk.step, data);
-      renderStep(section, data);
-    } catch (error) {
-      content.innerHTML = "";
-      content.appendChild(makeEl("div", "empty-state", `Could not load step ${chunk.step}: ${error.message}`));
-    } finally {
-      state.loading.delete(chunk.step);
-    }
-  })();
-
-  state.loading.set(chunk.step, promise);
-  return promise;
-}
-
-function rerenderLoadedSteps() {
-  state.manifest.chunks.forEach((chunk, index) => {
-    const data = state.loadedSteps.get(chunk.step);
-    if (!data) {
-      return;
-    }
-    const section = document.querySelector(`[data-step-index="${index}"]`);
-    renderStep(section, data);
-  });
-}
-
-// Step filter hides every checkpoint section except the chosen one (or shows
-// all). Only the visible step needs to be loaded, so it stays cheap.
-function applyStepFilter() {
-  const sections = document.querySelectorAll(".step-section");
-  if (state.stepFilter === "all") {
-    sections.forEach((section) => section.classList.remove("is-hidden"));
-    return;
-  }
-
-  sections.forEach((section) => {
-    const index = Number(section.dataset.stepIndex);
-    const chunk = state.manifest.chunks[index];
-    if (String(chunk.step) === state.stepFilter) {
-      section.classList.remove("is-hidden");
-      loadStep(index);
-      updateProgress(index);
-    } else {
-      section.classList.add("is-hidden");
-    }
-  });
-}
-
-function applyFilters() {
-  applyStepFilter();
-  rerenderLoadedSteps();
-}
-
-function setupObservers() {
-  const lazyObserver = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) {
-          return;
-        }
-        const index = Number(entry.target.dataset.stepIndex);
-        loadStep(index);
-      });
-    },
-    { rootMargin: "900px 0px 1200px 0px" }
-  );
-
-  const activeObserver = new IntersectionObserver(
-    (entries) => {
-      const visible = entries
-        .filter((entry) => entry.isIntersecting)
-        .sort((a, b) => Math.abs(a.boundingClientRect.top) - Math.abs(b.boundingClientRect.top));
-      if (!visible.length) {
+      const data = await loadStepData(stepIndex);
+      if (session !== state.resultSession) {
         return;
       }
-      const index = Number(visible[0].target.dataset.stepIndex);
-      updateProgress(index);
-    },
-    { rootMargin: "-35% 0px -55% 0px", threshold: [0, 0.2, 0.6] }
-  );
+      if (!data) {
+        continue;
+      }
 
-  document.querySelectorAll(".step-section").forEach((section) => {
-    lazyObserver.observe(section);
-    activeObserver.observe(section);
-  });
+      const chunk = state.manifest.chunks[stepIndex];
+      const matches = data.items
+        .filter(itemMatchesControls)
+        .map((item) => ({
+          ...item,
+          step: chunk.step,
+          step_index: stepIndex
+        }));
+      state.pendingItems.push(...matches);
+      state.scannedChunkCount += 1;
+    }
+
+    const batch = state.pendingItems.splice(0, PAGE_SIZE);
+    appendResultItems(batch);
+    state.renderedCount += batch.length;
+  } catch (error) {
+    if (session === state.resultSession) {
+      els.resultList.appendChild(makeEl("div", "empty-state", `Could not load selected responses: ${error.message}`));
+    }
+  } finally {
+    if (session !== state.resultSession) {
+      return;
+    }
+
+    state.isLoadingBatch = false;
+    const hasMore = state.pendingItems.length > 0 || state.resultChunkCursor < state.resultStepIndexes.length;
+    setLoadMoreState(hasMore);
+    updateResultSummary();
+
+    if (state.renderedCount === 0 && !hasMore && !els.resultList.children.length) {
+      els.resultList.appendChild(makeEl("div", "empty-state", "No exported responses match the current controls."));
+    }
+  }
 }
 
-async function scrollToStep(index) {
-  const section = document.querySelector(`[data-step-index="${index}"]`);
-  if (!section) {
-    return;
-  }
-  updateProgress(index);
-  await loadStep(index);
-  section.scrollIntoView({ block: "start", behavior: "smooth" });
+function startResultRender() {
+  state.resultSession += 1;
+  const session = state.resultSession;
+  resetResultState();
+  loadMoreResults(session);
 }
 
 function setupEvents() {
-  els.stepRange.addEventListener("input", (event) => {
-    // Scrubbing the slider only makes sense across all steps, so leave
-    // single-step mode if it's active.
-    if (state.stepFilter !== "all") {
-      state.stepFilter = "all";
-      els.stepSelect.value = "all";
-      applyStepFilter();
-    }
-    scrollToStep(Number(event.target.value));
-  });
-
   els.promptSelect.addEventListener("change", (event) => {
-    state.promptFilter = event.target.value;
-    renderPromptFigure();
-    applyFilters();
+    setControl("prompt", event.target.value);
+  });
+  els.promptRange.addEventListener("input", (event) => {
+    setControl("prompt", sliderIndexToValue("prompt", event.target.value));
   });
 
   els.trialSelect.addEventListener("change", (event) => {
-    state.trialFilter = event.target.value;
-    applyFilters();
+    setControl("trial", event.target.value);
+  });
+  els.trialRange.addEventListener("input", (event) => {
+    setControl("trial", sliderIndexToValue("trial", event.target.value));
   });
 
   els.stepSelect.addEventListener("change", (event) => {
-    state.stepFilter = event.target.value;
-    applyFilters();
+    setControl("step", event.target.value);
+  });
+  els.stepRange.addEventListener("input", (event) => {
+    setControl("step", sliderIndexToValue("step", event.target.value));
+  });
+
+  els.loadMoreButton.addEventListener("click", () => {
+    loadMoreResults(state.resultSession);
   });
 }
 
@@ -454,11 +578,8 @@ async function init() {
   renderMeta();
   renderPromptFigure();
   renderFigures();
-  createStepSections();
   setupEvents();
-  setupObservers();
-  updateProgress(0);
-  loadStep(0);
+  startResultRender();
 }
 
 init();
