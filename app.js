@@ -75,6 +75,20 @@ function setError(message) {
   els.loadError.textContent = message;
 }
 
+function showResultStatus(message) {
+  if (state.renderedCount > 0) {
+    return;
+  }
+  els.resultList.innerHTML = "";
+  els.resultList.appendChild(makeEl("div", "status-line result-status", message));
+}
+
+function clearResultStatus() {
+  els.resultList.querySelectorAll(".result-status").forEach((node) => {
+    node.remove();
+  });
+}
+
 async function fetchJson(path) {
   const response = await fetch(path);
   if (!response.ok) {
@@ -445,9 +459,8 @@ function updateResultSummary() {
   const estimate = selectedMatchEstimate();
   const totalSteps = state.resultStepIndexes.length;
   const scannedSteps = state.scannedChunkCount;
-  const stepPart = state.stepValue === ALL_VALUE
-    ? `${compactNumber(scannedSteps)} of ${compactNumber(totalSteps)} step chunks scanned`
-    : `${compactNumber(totalSteps)} step chunk scanned`;
+  const chunkWord = totalSteps === 1 ? "chunk" : "chunks";
+  const stepPart = `${compactNumber(scannedSteps)} of ${compactNumber(totalSteps)} step ${chunkWord} scanned`;
 
   els.resultSummary.textContent =
     `${compactNumber(state.renderedCount)} of ${compactNumber(estimate)} shown · ${stepPart}`;
@@ -477,6 +490,7 @@ async function loadMoreResults(session = state.resultSession) {
   }
 
   state.isLoadingBatch = true;
+  showResultStatus("Loading selected responses...");
   setLoadMoreState(true);
 
   try {
@@ -511,10 +525,12 @@ async function loadMoreResults(session = state.resultSession) {
     }
 
     const batch = state.pendingItems.splice(0, PAGE_SIZE);
+    clearResultStatus();
     appendResultItems(batch);
     state.renderedCount += batch.length;
   } catch (error) {
     if (session === state.resultSession) {
+      clearResultStatus();
       els.resultList.appendChild(makeEl("div", "empty-state", `Could not load selected responses: ${error.message}`));
     }
   } finally {
@@ -527,16 +543,52 @@ async function loadMoreResults(session = state.resultSession) {
     setLoadMoreState(hasMore);
     updateResultSummary();
 
+    if (state.renderedCount === 0 && hasMore && !els.resultList.children.length) {
+      showResultStatus("No matching responses in scanned chunks yet. Load more to continue.");
+    }
+
     if (state.renderedCount === 0 && !hasMore && !els.resultList.children.length) {
       els.resultList.appendChild(makeEl("div", "empty-state", "No exported responses match the current controls."));
     }
   }
 }
 
+function defaultSelectionPreview() {
+  const defaults = state.manifest.defaults || {};
+  const preview = defaults.preview_item;
+  if (!preview) {
+    return null;
+  }
+
+  const previewStep = preview.step !== undefined ? String(preview.step) : defaultStepValue();
+  const matchesDefaultPrompt = state.promptValue === String(defaults.prompt_id);
+  const matchesDefaultTrial = state.trialValue === String(defaults.trial_id);
+  const matchesDefaultStep = state.stepValue === previewStep;
+
+  if (!matchesDefaultPrompt || !matchesDefaultTrial || !matchesDefaultStep) {
+    return null;
+  }
+
+  return {
+    ...preview,
+    step: Number(previewStep)
+  };
+}
+
 function startResultRender() {
   state.resultSession += 1;
   const session = state.resultSession;
   resetResultState();
+
+  const preview = defaultSelectionPreview();
+  if (preview) {
+    appendResultItems([preview]);
+    state.renderedCount = 1;
+    state.scannedChunkCount = 1;
+    updateResultSummary();
+    return;
+  }
+
   loadMoreResults(session);
 }
 
@@ -581,5 +633,14 @@ async function init() {
   setupEvents();
   startResultRender();
 }
+
+window.addEventListener("error", (event) => {
+  setError(`Unexpected viewer error: ${event.message}`);
+});
+
+window.addEventListener("unhandledrejection", (event) => {
+  const reason = event.reason && event.reason.message ? event.reason.message : String(event.reason);
+  setError(`Unexpected viewer error: ${reason}`);
+});
 
 init();
