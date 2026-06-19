@@ -1,4 +1,5 @@
 const ALL_VALUE = "all";
+const DATA_VERSION = "20260619-render-fix";
 const PAGE_SIZE = 80;
 const STEP_CHUNKS_PER_BATCH = 12;
 
@@ -621,7 +622,7 @@ function setupEvents() {
 
 async function init() {
   try {
-    state.manifest = await fetchJson("data/manifest.json");
+    state.manifest = await fetchJson(`data/manifest.json?v=${DATA_VERSION}`);
   } catch (error) {
     setError(`Could not load data/manifest.json: ${error.message}`);
     return;
