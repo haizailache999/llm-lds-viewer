@@ -1,5 +1,5 @@
 const ALL_VALUE = "all";
-const DATA_VERSION = "20260619-render-fix";
+const DATA_VERSION = "20260619-response-fix";
 const PAGE_SIZE = 80;
 const STEP_CHUNKS_PER_BATCH = 12;
 
@@ -90,8 +90,12 @@ function clearResultStatus() {
   });
 }
 
+function assetUrl(relativePath) {
+  return new URL(relativePath, document.baseURI).href;
+}
+
 async function fetchJson(path) {
-  const response = await fetch(path);
+  const response = await fetch(assetUrl(path));
   if (!response.ok) {
     throw new Error(`${response.status} ${response.statusText}`);
   }
@@ -316,13 +320,13 @@ function renderFigures() {
   figures.forEach((figure) => {
     const wrapper = makeEl("figure", "figure metric-figure");
     const link = document.createElement("a");
-    link.href = figure.path;
+    link.href = assetUrl(figure.path);
     link.target = "_blank";
     link.rel = "noopener";
     link.title = "Open full-size figure";
 
     const image = document.createElement("img");
-    image.src = figure.path;
+    image.src = assetUrl(figure.path);
     image.alt = figure.label;
     image.loading = "lazy";
 
@@ -350,13 +354,13 @@ function renderPromptFigure() {
 
   const wrapper = makeEl("figure", "figure prompt-figure");
   const link = document.createElement("a");
-  link.href = figure.path;
+  link.href = assetUrl(figure.path);
   link.target = "_blank";
   link.rel = "noopener";
   link.title = "Open full-size figure";
 
   const image = document.createElement("img");
-  image.src = figure.path;
+  image.src = assetUrl(figure.path);
   image.alt = figure.label || `ln_trace summary for prompt ${state.promptValue}`;
   image.loading = "lazy";
 
@@ -449,11 +453,19 @@ function renderItem(item) {
 }
 
 function appendResultItems(items) {
+  if (!items.length) {
+    return;
+  }
+
   const fragment = document.createDocumentFragment();
   items.forEach((item) => {
     fragment.appendChild(renderItem(item));
   });
   els.resultList.appendChild(fragment);
+
+  if (state.renderedCount === 0) {
+    els.resultList.closest(".result-mount")?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }
 }
 
 function updateResultSummary() {
@@ -536,6 +548,7 @@ async function loadMoreResults(session = state.resultSession) {
     }
   } finally {
     if (session !== state.resultSession) {
+      state.isLoadingBatch = false;
       return;
     }
 
@@ -590,6 +603,7 @@ function startResultRender() {
     return;
   }
 
+  showResultStatus("Loading selected responses...");
   loadMoreResults(session);
 }
 
@@ -621,6 +635,13 @@ function setupEvents() {
 }
 
 async function init() {
+  if (window.location.protocol === "file:") {
+    setError(
+      "This viewer must be opened over HTTP, not as a local file. Run: python3 -m http.server 8765"
+    );
+    return;
+  }
+
   try {
     state.manifest = await fetchJson(`data/manifest.json?v=${DATA_VERSION}`);
   } catch (error) {

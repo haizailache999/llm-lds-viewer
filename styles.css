@@ -531,7 +531,11 @@ pre {
   }
 
   .app-shell {
-    grid-template-columns: 1fr;
+    display: grid;
+  }
+
+  .result-mount {
+    order: -1;
   }
 
   .sidebar {

@@ -12,6 +12,18 @@ The site is self-contained:
 
 No local Python server is needed after GitHub Pages publishes this repository.
 
+## Local preview
+
+Do not open `index.html` directly in the browser (`file://`). Browsers block `fetch()` for local files, so responses will not load.
+
+From this folder, run:
+
+```bash
+python3 -m http.server 8765
+```
+
+Then open `http://localhost:8765/`.
+
 ## GitHub Pages
 
 1. Push this repository to GitHub.
